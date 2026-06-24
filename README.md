@@ -4,7 +4,7 @@
 
 ## 🚀 Overview
 
-Apptracked is a modern web application designed to help job seekers track their job applications and referrals. The application gamifies the job search process by awarding points and achievements, making the often tedious process more engaging and rewarding.
+Apptracked is a modern web application designed to help job seekers track their job applications and referrals. The application gamifies the job search process by awarding points and achievements, making the often tedious process more engaging and rewarding!
 
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black)](https://vercel.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)](https://www.typescriptlang.org/)
