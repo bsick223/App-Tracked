@@ -10,10 +10,8 @@ import {
   ChevronRight,
   Trash2,
   MoreVertical,
-  X,
   AlertCircle,
   Columns,
-  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { useQuery, useMutation } from "convex/react";
@@ -22,127 +20,23 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Toast } from "@/app/components/Toast";
 import { useSwipeable } from "react-swipeable";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
-
-// Available colors for status columns
-const STATUS_COLORS = [
-  { id: "bg-red-500", label: "Red" },
-  { id: "bg-orange-500", label: "Orange" },
-  { id: "bg-yellow-500", label: "Yellow" },
-  { id: "bg-green-500", label: "Green" },
-  { id: "bg-blue-500", label: "Blue" },
-  { id: "bg-indigo-500", label: "Indigo" },
-  { id: "bg-purple-500", label: "Purple" },
-  { id: "bg-pink-500", label: "Pink" },
-  { id: "bg-cyan-500", label: "Cyan" },
-  { id: "bg-emerald-500", label: "Emerald" },
-];
-
-// Algorithm categories
-const ALGORITHM_CATEGORIES = [
-  "Arrays & Hashing",
-  "Two Pointers",
-  "Sliding Window",
-  "Stack",
-  "Binary Search",
-  "Linked List",
-  "Trees",
-  "Heap / Priority Queue",
-  "Backtracking",
-  "Tries",
-  "Graphs",
-  "Advanced Graphs",
-  "1-D Dynamic Programming",
-  "2-D Dynamic Programming",
-  "Greedy",
-  "Intervals",
-  "Math & Geometry",
-  "Bit Manipulation",
-];
-
-// Common Big O notations
-const BIG_O_NOTATIONS = [
-  "O(1)",
-  "O(log n)",
-  "O(n)",
-  "O(n log n)",
-  "O(n²)",
-  "O(n³)",
-  "O(2^n)",
-  "O(n!)",
-  "Other",
-];
-
-// Type definitions
-type LeetcodeStatus = {
-  _id: Id<"leetcodeStatuses">;
-  name: string;
-  color: string;
-  order: number;
-  isDefault?: boolean;
-  userId: string;
-};
-
-type LeetcodeProblem = {
-  _id: Id<"leetcodeProblems">;
-  title: string;
-  link?: string;
-  difficulty?: string;
-  statusId: Id<"leetcodeStatuses">;
-  notes?: string;
-  score: number;
-  spaceComplexity?: string;
-  timeComplexity?: string;
-  customSpaceComplexity?: string;
-  customTimeComplexity?: string;
-  userId: string;
-  dayOfWeek: number;
-  orderIndex?: number;
-  createdAt: number;
-  updatedAt: number;
-  mastered?: boolean;
-  category?: string;
-};
-
-type ToastMessage = {
-  type: "success" | "error" | "info";
-  message: string;
-  onClose: () => void; // Make onClose required
-};
-
-// Format time elapsed since a given date
-const formatTimeElapsed = (date: string | number): string => {
-  const dateObj = typeof date === "string" ? new Date(date) : new Date(date);
-  const now = new Date();
-  const diffMs = now.getTime() - dateObj.getTime();
-
-  // Convert to seconds
-  const diffSec = Math.floor(diffMs / 1000);
-  if (diffSec < 60) return `${diffSec}s`;
-
-  // Convert to minutes
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin}m`;
-
-  // Convert to hours
-  const diffHours = Math.floor(diffMin / 60);
-  if (diffHours < 24) return `${diffHours}hr`;
-
-  // Convert to days
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d`;
-
-  // Convert to weeks
-  const diffWeeks = Math.floor(diffDays / 7);
-  if (diffWeeks < 4) return `${diffWeeks}w`;
-
-  // Convert to months
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths}mo`;
-
-  // Convert to years
-  const diffYears = Math.floor(diffDays / 365);
-  return `${diffYears}yr`;
-};
+import {
+  clearProblemDropIndicators,
+  leetcodeStyles,
+  PROBLEM_DROP_CLASS_BY_POSITION,
+  TOUCH_TARGET_CLASSES,
+} from "./dragStyles";
+import {
+  LeetcodeProblem,
+  LeetcodeProblemForm,
+  LeetcodeStatus,
+  ToastMessage,
+} from "./types";
+import { formatTimeElapsed } from "./utils";
+import { MasteredProblemsSection } from "./MasteredProblemsSection";
+import { StatusEditorModal } from "./StatusEditorModal";
+import { AddProblemModal } from "./AddProblemModal";
+import { ProblemDetailModal } from "./ProblemDetailModal";
 
 export default function LeetcodeTrackerPage() {
   const { user } = useUser();
@@ -206,7 +100,7 @@ export default function LeetcodeTrackerPage() {
 
   // Add new problem state
   const [isAddingProblem, setIsAddingProblem] = useState(false);
-  const [newProblem, setNewProblem] = useState({
+  const [newProblem, setNewProblem] = useState<LeetcodeProblemForm>({
     title: "",
     link: "",
     notes: "",
@@ -413,14 +307,10 @@ export default function LeetcodeTrackerPage() {
         setDropPosition(position);
 
         // Remove any existing hover classes
-        document
-          .querySelectorAll(".problem-drop-before, .problem-drop-after")
-          .forEach((el) => {
-            el.classList.remove("problem-drop-before", "problem-drop-after");
-          });
+        clearProblemDropIndicators();
 
         // Add appropriate hover class
-        problemElement.classList.add(`problem-drop-${position}`);
+        problemElement.classList.add(PROBLEM_DROP_CLASS_BY_POSITION[position]);
       }
     } else {
       // We're just over the column but not a specific problem
@@ -428,11 +318,7 @@ export default function LeetcodeTrackerPage() {
       setDropPosition(null);
 
       // Remove any existing hover classes
-      document
-        .querySelectorAll(".problem-drop-before, .problem-drop-after")
-        .forEach((el) => {
-          el.classList.remove("problem-drop-before", "problem-drop-after");
-        });
+      clearProblemDropIndicators();
     }
   };
 
@@ -440,11 +326,7 @@ export default function LeetcodeTrackerPage() {
     e.preventDefault();
 
     // Remove any existing hover classes
-    document
-      .querySelectorAll(".problem-drop-before, .problem-drop-after")
-      .forEach((el) => {
-        el.classList.remove("problem-drop-before", "problem-drop-after");
-      });
+    clearProblemDropIndicators();
 
     if (!isDraggingProblem) return;
 
@@ -1030,7 +912,7 @@ export default function LeetcodeTrackerPage() {
       ghost.style.zIndex = "9999";
       ghost.style.pointerEvents = "none";
       ghost.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
-      ghost.classList.add("touch-drag-ghost");
+      ghost.classList.add(leetcodeStyles.touchDragGhost);
 
       document.body.appendChild(ghost);
       setGhostElement(ghost);
@@ -1074,17 +956,13 @@ export default function LeetcodeTrackerPage() {
 
     // Reset previous touch target styles
     if (touchCurrentTarget && touchCurrentTarget !== columnElement) {
-      touchCurrentTarget.classList.remove(
-        "touch-drag-over",
-        "problem-drop-before",
-        "problem-drop-after"
-      );
+      touchCurrentTarget.classList.remove(...TOUCH_TARGET_CLASSES);
     }
 
     if (columnElement) {
       // We're over a column
       setTouchCurrentTarget(columnElement);
-      columnElement.classList.add("touch-drag-over");
+      columnElement.classList.add(leetcodeStyles.touchDragOver);
 
       // If we're also over a problem, handle problem drop position
       if (
@@ -1105,14 +983,12 @@ export default function LeetcodeTrackerPage() {
           setDropPosition(position);
 
           // Remove any existing hover classes
-          document
-            .querySelectorAll(".problem-drop-before, .problem-drop-after")
-            .forEach((el) => {
-              el.classList.remove("problem-drop-before", "problem-drop-after");
-            });
+          clearProblemDropIndicators();
 
           // Add appropriate hover class
-          problemElement.classList.add(`problem-drop-${position}`);
+          problemElement.classList.add(
+            PROBLEM_DROP_CLASS_BY_POSITION[position]
+          );
         }
       } else {
         // Just over a column, not a specific problem
@@ -1243,19 +1119,11 @@ export default function LeetcodeTrackerPage() {
 
     // Reset other state
     if (touchCurrentTarget) {
-      touchCurrentTarget.classList.remove(
-        "touch-drag-over",
-        "problem-drop-before",
-        "problem-drop-after"
-      );
+      touchCurrentTarget.classList.remove(...TOUCH_TARGET_CLASSES);
     }
 
     // Remove any drop indicators
-    document
-      .querySelectorAll(".problem-drop-before, .problem-drop-after")
-      .forEach((el) => {
-        el.classList.remove("problem-drop-before", "problem-drop-after");
-      });
+    clearProblemDropIndicators();
 
     setTouchDragging(false);
     setDraggedProblemId(null);
@@ -1269,17 +1137,9 @@ export default function LeetcodeTrackerPage() {
     // Create a ripple effect to show the user the drag has started
     const touch = e.touches[0];
     const ripple = document.createElement("div");
-    ripple.className = "touch-drag-indicator";
-    ripple.style.position = "fixed";
+    ripple.className = leetcodeStyles.touchDragIndicator;
     ripple.style.top = `${touch.clientY - 25}px`;
     ripple.style.left = `${touch.clientX - 25}px`;
-    ripple.style.width = "50px";
-    ripple.style.height = "50px";
-    ripple.style.borderRadius = "50%";
-    ripple.style.background = "rgba(255, 255, 255, 0.3)";
-    ripple.style.zIndex = "9998";
-    ripple.style.pointerEvents = "none";
-    ripple.style.animation = "ripple 0.8s ease-out forwards";
 
     document.body.appendChild(ripple);
 
@@ -1711,709 +1571,56 @@ export default function LeetcodeTrackerPage() {
         </div>
       </div>
 
-      {/* Mastered Problems Section */}
-      {masteredProblems.length > 0 && (
-        <div className="border-t border-gray-800 mt-4 mx-4">
-          <div className="flex items-center justify-between pt-4 pb-2">
-            <h2 className="text-lg font-medium text-white">
-              Mastered Problems
-            </h2>
-            <span className="bg-emerald-500/20 text-emerald-300 text-sm px-2 py-1 rounded-full">
-              {masteredProblems.length}{" "}
-              {masteredProblems.length === 1 ? "problem" : "problems"}
-            </span>
-          </div>
+      <MasteredProblemsSection
+        masteredProblems={masteredProblems}
+        groupedMasteredProblems={groupedMasteredProblems}
+        collapsedCategories={collapsedCategories}
+        onToggleCategory={toggleCategoryCollapse}
+        onOpenProblem={openProblemModal}
+      />
 
-          {/* Render grouped problems */}
-          {groupedMasteredProblems.map((group) => (
-            <div key={group.category} className="mb-6">
-              <h3
-                className="text-indigo-300 text-md font-medium mt-4 mb-2 border-b border-indigo-900/30 pb-1 flex items-center cursor-pointer"
-                onClick={() => toggleCategoryCollapse(group.category)}
-              >
-                <span className="mr-2">
-                  {collapsedCategories[group.category] ? (
-                    <ChevronRight className="h-4 w-4 text-indigo-400" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-indigo-400" />
-                  )}
-                </span>
-                {group.category}{" "}
-                <span className="text-sm text-indigo-400/60 ml-1">
-                  ({group.problems.length})
-                </span>
-              </h3>
+      <StatusEditorModal
+        isAddingStatus={isAddingStatus}
+        editingStatusId={editingStatusId}
+        newStatusFormRef={newStatusFormRef}
+        colorPickerRef={colorPickerRef}
+        newStatusName={newStatusName}
+        newStatusColor={newStatusColor}
+        editingStatusName={editingStatusName}
+        editingStatusColor={editingStatusColor}
+        onNewStatusNameChange={setNewStatusName}
+        onSelectColor={selectColor}
+        onCancel={() => {
+          setIsAddingStatus(false);
+          setEditingStatusId(null);
+        }}
+        onAddStatus={handleAddStatus}
+        onUpdateStatus={handleUpdateStatus}
+      />
 
-              {!collapsedCategories[group.category] && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {group.problems.map((problem) => (
-                    <div
-                      key={problem._id}
-                      className="bg-[#121a36]/50 border border-emerald-800/30 p-3 rounded-md cursor-pointer hover:bg-[#1a2542]/50"
-                      onClick={() => openProblemModal(problem)}
-                    >
-                      <div className="flex justify-between items-start">
-                        <h4 className="text-sm font-medium text-white">
-                          {problem.title}
-                        </h4>
-                        {problem.difficulty && (
-                          <span
-                            className={`text-xs px-1.5 py-0.5 rounded-full ${
-                              problem.difficulty === "Easy"
-                                ? "bg-green-500/20 text-green-300"
-                                : problem.difficulty === "Medium"
-                                ? "bg-yellow-500/20 text-yellow-300"
-                                : "bg-red-500/20 text-red-300"
-                            }`}
-                          >
-                            {problem.difficulty}
-                          </span>
-                        )}
-                      </div>
-                      {problem.link && (
-                        <a
-                          href={problem.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-blue-400 hover:text-blue-300 mt-2 inline-block"
-                        >
-                          View Problem
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      <ProblemDetailModal
+        selectedProblem={selectedProblem}
+        editedProblem={editedProblem}
+        isEditingProblem={isEditingProblem}
+        modalRef={problemModalRef}
+        onClose={closeProblemModal}
+        onInputChange={handleProblemInputChange}
+        onCancelEdit={() => setIsEditingProblem(false)}
+        onSaveProblem={saveProblem}
+        onToggleEdit={toggleEditProblem}
+        onMarkAsMastered={handleMarkAsMastered}
+        onUnmasterProblem={handleUnmasterProblem}
+      />
 
-      {/* Color picker / status editor */}
-      {(isAddingStatus || editingStatusId) && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-20"
-          onClick={() => {
-            setIsAddingStatus(false);
-            setEditingStatusId(null);
-          }}
-        >
-          <div
-            ref={editingStatusId ? colorPickerRef : newStatusFormRef}
-            className="bg-gray-900 p-4 rounded-lg w-80 max-w-full mx-4"
-            onClick={(e) => e.stopPropagation()}
-            data-color-picker
-          >
-            <h3 className="text-white text-lg mb-4">
-              {editingStatusId ? "Edit Day Color" : "Add New Day"}
-            </h3>
-            {!editingStatusId && (
-              <div className="mb-4">
-                <label className="block text-gray-400 mb-1 text-sm">Name</label>
-                <input
-                  type="text"
-                  value={newStatusName}
-                  onChange={(e) => setNewStatusName(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Enter day name"
-                />
-              </div>
-            )}
-            {editingStatusId && (
-              <div className="mb-4">
-                <p className="text-gray-400 mb-1 text-sm">Name</p>
-                <p className="text-white text-md font-medium">
-                  {editingStatusName}
-                </p>
-              </div>
-            )}
-            <div className="mb-6">
-              <label className="block text-gray-400 mb-1 text-sm">Color</label>
-              <div className="grid grid-cols-5 gap-2">
-                {STATUS_COLORS.map((color) => (
-                  <button
-                    key={color.id}
-                    className={`w-10 h-10 rounded-full ${color.id} ${
-                      (editingStatusId
-                        ? editingStatusColor
-                        : newStatusColor) === color.id
-                        ? "ring-2 ring-white ring-opacity-60"
-                        : ""
-                    }`}
-                    onClick={() => selectColor(color.id)}
-                    aria-label={`Select ${color.label} color`}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="flex justify-end space-x-2">
-              <button
-                onClick={() => {
-                  setIsAddingStatus(false);
-                  setEditingStatusId(null);
-                }}
-                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-md hover:bg-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() =>
-                  editingStatusId
-                    ? handleUpdateStatus(editingStatusId)
-                    : handleAddStatus()
-                }
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-              >
-                {editingStatusId ? "Update Color" : "Add"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Problem detail modal */}
-      {selectedProblem && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-20"
-          onClick={closeProblemModal}
-        >
-          <div
-            ref={problemModalRef}
-            className="bg-gray-900 p-4 rounded-lg w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-            data-problem-modal
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white text-lg">
-                {isEditingProblem ? "Edit Problem" : "Problem Details"}
-              </h3>
-              <button
-                onClick={closeProblemModal}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {isEditingProblem && editedProblem ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={editedProblem.title}
-                    onChange={handleProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Difficulty
-                  </label>
-                  <select
-                    name="difficulty"
-                    value={editedProblem.difficulty || ""}
-                    onChange={handleProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="">Select difficulty</option>
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Score (1-5)
-                  </label>
-                  <select
-                    name="score"
-                    value={editedProblem.score}
-                    onChange={handleProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value={1}>1 - Review tomorrow</option>
-                    <option value={2}>2 - Review in 2 days</option>
-                    <option value={3}>3 - Review in 3 days</option>
-                    <option value={4}>4 - Review in 4 days</option>
-                    <option value={5}>5 - Review in 5 days</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Problem Link
-                  </label>
-                  <input
-                    type="url"
-                    name="link"
-                    value={editedProblem.link || ""}
-                    onChange={handleProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    placeholder="https://leetcode.com/problems/..."
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="block text-gray-400 mb-1 text-sm">
-                      Time Complexity
-                    </label>
-                    <select
-                      name="timeComplexity"
-                      value={editedProblem.timeComplexity || ""}
-                      onChange={handleProblemInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="">Select complexity</option>
-                      {BIG_O_NOTATIONS.map((notation) => (
-                        <option key={notation} value={notation}>
-                          {notation}
-                        </option>
-                      ))}
-                    </select>
-                    {editedProblem.timeComplexity === "Other" && (
-                      <input
-                        type="text"
-                        name="customTimeComplexity"
-                        value={editedProblem.customTimeComplexity || ""}
-                        onChange={handleProblemInputChange}
-                        className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        placeholder="e.g., O(m*n)"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-gray-400 mb-1 text-sm">
-                      Space Complexity
-                    </label>
-                    <select
-                      name="spaceComplexity"
-                      value={editedProblem.spaceComplexity || ""}
-                      onChange={handleProblemInputChange}
-                      className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="">Select complexity</option>
-                      {BIG_O_NOTATIONS.map((notation) => (
-                        <option key={notation} value={notation}>
-                          {notation}
-                        </option>
-                      ))}
-                    </select>
-                    {editedProblem.spaceComplexity === "Other" && (
-                      <input
-                        type="text"
-                        name="customSpaceComplexity"
-                        value={editedProblem.customSpaceComplexity || ""}
-                        onChange={handleProblemInputChange}
-                        className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        placeholder="e.g., O(m*n)"
-                      />
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Notes
-                  </label>
-                  <textarea
-                    name="notes"
-                    value={editedProblem.notes || ""}
-                    onChange={handleProblemInputChange}
-                    rows={4}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    placeholder="Add your notes here..."
-                  />
-                </div>
-                {/* Add this to the Edit Problem form */}
-                <div>
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Category
-                  </label>
-                  <select
-                    name="category"
-                    value={editedProblem.category || ""}
-                    onChange={handleProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="">Select category</option>
-                    {ALGORITHM_CATEGORIES.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex justify-end space-x-2 pt-2">
-                  <button
-                    onClick={() => setIsEditingProblem(false)}
-                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-md hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={saveProblem}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  {/* Add "Mastered" tag for mastered problems */}
-                  {selectedProblem.mastered && (
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-1 rounded-full">
-                        Mastered
-                      </span>
-                      <button
-                        onClick={() =>
-                          handleUnmasterProblem(selectedProblem._id)
-                        }
-                        className="text-xs text-gray-400 hover:text-white px-2 py-1 hover:bg-gray-800 rounded"
-                      >
-                        Move back to board
-                      </button>
-                    </div>
-                  )}
-
-                  <h4 className="text-white text-xl mb-2">
-                    {selectedProblem.title}
-                  </h4>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {selectedProblem.difficulty && (
-                      <span
-                        className={`text-sm px-2 py-1 rounded-full ${
-                          selectedProblem.difficulty === "Easy"
-                            ? "bg-green-500/20 text-green-300"
-                            : selectedProblem.difficulty === "Medium"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-red-500/20 text-red-300"
-                        }`}
-                      >
-                        {selectedProblem.difficulty}
-                      </span>
-                    )}
-                    <span className="text-sm px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300">
-                      Score: {selectedProblem.score}
-                    </span>
-
-                    {/* Display category if available */}
-                    {selectedProblem.category && (
-                      <span className="text-sm px-2 py-1 rounded-full bg-purple-500/20 text-purple-300">
-                        {selectedProblem.category}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Add mastered checkbox if score is 5 */}
-                  {selectedProblem.score === 5 && !selectedProblem.mastered && (
-                    <div className="bg-emerald-900/20 border border-emerald-800/30 rounded-md p-3 mt-2 mb-4">
-                      <div className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id="mastered-checkbox"
-                          className="mr-2 h-4 w-4 rounded border-gray-600 text-indigo-600 focus:ring-indigo-500"
-                          onChange={() =>
-                            handleMarkAsMastered(selectedProblem._id)
-                          }
-                        />
-                        <label
-                          htmlFor="mastered-checkbox"
-                          className="text-emerald-300 text-sm"
-                        >
-                          Mark as mastered (achieved score of 5)
-                        </label>
-                      </div>
-                      <p className="text-gray-400 text-xs mt-1">
-                        This will move the problem to your mastered list below
-                        the board.
-                      </p>
-                    </div>
-                  )}
-
-                  {(selectedProblem.timeComplexity ||
-                    selectedProblem.spaceComplexity) && (
-                    <div className="bg-gray-800/50 rounded-md p-2 mb-3">
-                      <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        {selectedProblem.timeComplexity && (
-                          <div className="text-sm">
-                            <span className="text-gray-400">Time:</span>
-                            <span className="text-white ml-1">
-                              {selectedProblem.timeComplexity}
-                            </span>
-                          </div>
-                        )}
-                        {selectedProblem.spaceComplexity && (
-                          <div className="text-sm">
-                            <span className="text-gray-400">Space:</span>
-                            <span className="text-white ml-1">
-                              {selectedProblem.spaceComplexity}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedProblem.link && (
-                    <a
-                      href={selectedProblem.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 text-sm flex items-center mb-4"
-                    >
-                      <span>Open on Leetcode</span>
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </a>
-                  )}
-                  <div className="border-t border-gray-800 my-4"></div>
-                  <div>
-                    <h5 className="text-gray-400 text-sm mb-1">Notes</h5>
-                    <p className="text-white whitespace-pre-wrap">
-                      {selectedProblem.notes || "No notes added."}
-                    </p>
-                  </div>
-                  <div className="text-gray-500 text-xs mt-4">
-                    Last updated:{" "}
-                    {new Date(selectedProblem.updatedAt).toLocaleString()}
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2 pt-2">
-                  {/* Only show edit button for non-mastered problems */}
-                  {!selectedProblem.mastered && (
-                    <button
-                      onClick={toggleEditProblem}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-                    >
-                      Edit Problem
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Add Problem Modal */}
-      {isAddingProblem && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-20"
-          onClick={() => setIsAddingProblem(false)}
-        >
-          <div
-            ref={addProblemModalRef}
-            className="bg-gray-900 p-4 rounded-lg w-full max-w-md mx-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-white text-lg">Add Leetcode Problem</h3>
-              <button
-                onClick={() => setIsAddingProblem(false)}
-                className="text-gray-400 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Problem Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="title"
-                  value={newProblem.title}
-                  onChange={handleNewProblemInputChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="e.g., Two Sum"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Difficulty
-                </label>
-                <select
-                  name="difficulty"
-                  value={newProblem.difficulty}
-                  onChange={handleNewProblemInputChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="">Select difficulty</option>
-                  <option value="Easy">Easy</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Hard">Hard</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Score <span className="text-red-500">*</span>
-                  <span className="text-xs ml-1 text-gray-500">
-                    (1-5, determines review schedule)
-                  </span>
-                </label>
-                <select
-                  name="score"
-                  value={newProblem.score}
-                  onChange={handleNewProblemInputChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  required
-                >
-                  <option value={1}>1 - Review tomorrow</option>
-                  <option value={2}>2 - Review in 2 days</option>
-                  <option value={3}>3 - Review in 3 days</option>
-                  <option value={4}>4 - Review in 4 days</option>
-                  <option value={5}>5 - Review in 5 days</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  {`This problem will be scheduled for ${
-                    [
-                      "Sunday",
-                      "Monday",
-                      "Tuesday",
-                      "Wednesday",
-                      "Thursday",
-                      "Friday",
-                      "Saturday",
-                    ][getTargetDayOfWeek(newProblem.score)]
-                  }`}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Problem Link
-                </label>
-                <input
-                  type="url"
-                  name="link"
-                  value={newProblem.link}
-                  onChange={handleNewProblemInputChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="https://leetcode.com/problems/..."
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Time Complexity
-                  </label>
-                  <select
-                    name="timeComplexity"
-                    value={newProblem.timeComplexity}
-                    onChange={handleNewProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="">Select complexity</option>
-                    {BIG_O_NOTATIONS.map((notation) => (
-                      <option key={notation} value={notation}>
-                        {notation}
-                      </option>
-                    ))}
-                  </select>
-                  {newProblem.timeComplexity === "Other" && (
-                    <input
-                      type="text"
-                      name="customTimeComplexity"
-                      value={newProblem.customTimeComplexity}
-                      onChange={handleNewProblemInputChange}
-                      className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                      placeholder="e.g., O(m*n)"
-                    />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <label className="block text-gray-400 mb-1 text-sm">
-                    Space Complexity
-                  </label>
-                  <select
-                    name="spaceComplexity"
-                    value={newProblem.spaceComplexity}
-                    onChange={handleNewProblemInputChange}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  >
-                    <option value="">Select complexity</option>
-                    {BIG_O_NOTATIONS.map((notation) => (
-                      <option key={notation} value={notation}>
-                        {notation}
-                      </option>
-                    ))}
-                  </select>
-                  {newProblem.spaceComplexity === "Other" && (
-                    <input
-                      type="text"
-                      name="customSpaceComplexity"
-                      value={newProblem.customSpaceComplexity}
-                      onChange={handleNewProblemInputChange}
-                      className="w-full mt-2 bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                      placeholder="e.g., O(m*n)"
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Notes
-                </label>
-                <textarea
-                  name="notes"
-                  value={newProblem.notes}
-                  onChange={handleNewProblemInputChange}
-                  rows={3}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                  placeholder="Add your notes, approach, or tips here..."
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-400 mb-1 text-sm">
-                  Category
-                </label>
-                <select
-                  name="category"
-                  value={newProblem.category}
-                  onChange={handleNewProblemInputChange}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                >
-                  <option value="">Select category</option>
-                  {ALGORITHM_CATEGORIES.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="flex justify-end space-x-2 pt-2">
-                <button
-                  onClick={() => setIsAddingProblem(false)}
-                  className="px-4 py-2 bg-gray-800 text-gray-300 rounded-md hover:bg-gray-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddProblem}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-                >
-                  Add Problem
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddProblemModal
+        isOpen={isAddingProblem}
+        modalRef={addProblemModalRef}
+        newProblem={newProblem}
+        onClose={() => setIsAddingProblem(false)}
+        onAddProblem={handleAddProblem}
+        onInputChange={handleNewProblemInputChange}
+        getTargetDayOfWeek={getTargetDayOfWeek}
+      />
 
       {/* Toast notifications */}
       {toast && (
@@ -2424,46 +1631,6 @@ export default function LeetcodeTrackerPage() {
         />
       )}
 
-      {/* Add global styles for touch dragging */}
-      <style jsx global>{`
-        .touch-drag-ghost {
-          touch-action: none;
-        }
-
-        .touch-drag-over {
-          background-color: rgba(79, 70, 229, 0.1);
-        }
-
-        .problem-drop-before {
-          border-top: 2px solid #6366f1;
-        }
-
-        .problem-drop-after {
-          border-bottom: 2px solid #6366f1;
-        }
-
-        .dropzone-before {
-          box-shadow: -4px 0 0 #6366f1;
-        }
-
-        .dropzone-after {
-          box-shadow: 4px 0 0 #6366f1;
-        }
-
-        @keyframes ripple {
-          0% {
-            transform: scale(0.1);
-            opacity: 0;
-          }
-          50% {
-            opacity: 0.3;
-          }
-          100% {
-            transform: scale(3);
-            opacity: 0;
-          }
-        }
-      `}</style>
     </div>
   );
 }

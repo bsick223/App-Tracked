@@ -1,0 +1,6 @@
+allowBuilds:
+  '@clerk/shared': true
+  '@scarf/scarf': true
+  '@vercel/speed-insights': true
+  esbuild: true
+  sharp: true
