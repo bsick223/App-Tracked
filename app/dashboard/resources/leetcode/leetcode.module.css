@@ -1,0 +1,50 @@
+.touchDragGhost {
+  touch-action: none;
+}
+
+.touchDragOver {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+.problemDropBefore {
+  border-top: 2px solid #6366f1;
+}
+
+.problemDropAfter {
+  border-bottom: 2px solid #6366f1;
+}
+
+.dropzoneBefore {
+  box-shadow: -4px 0 0 #6366f1;
+}
+
+.dropzoneAfter {
+  box-shadow: 4px 0 0 #6366f1;
+}
+
+.touchDragIndicator {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 9998;
+  pointer-events: none;
+  animation: ripple 0.8s ease-out forwards;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.1);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
