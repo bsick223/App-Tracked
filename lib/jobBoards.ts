@@ -21,21 +21,10 @@ export interface JobBoardCategory {
 
 export const jobBoardCategories: JobBoardCategory[] = [
   {
-    id: "aggregators",
-    title: "The big aggregators",
-    boards: [
-      { name: "LinkedIn Jobs", url: "https://www.linkedin.com/jobs/" },
-      { name: "Indeed", url: "https://www.indeed.com/" },
-      {
-        name: "Google Jobs",
-        url: "https://www.google.com/search?q=software+engineer+jobs&ibp=htl;jobs",
-      },
-    ],
-  },
-  {
     id: "new-grad",
     title: "New grad & internships",
     boards: [
+      { name: "Jobright.ai", url: "https://jobright.ai/" },
       { name: "Simplify", url: "https://simplify.jobs/" },
       { name: "Handshake", url: "https://joinhandshake.com/" },
       {
@@ -65,6 +54,18 @@ export const jobBoardCategories: JobBoardCategory[] = [
     boards: [
       { name: "We Work Remotely", url: "https://weworkremotely.com/" },
       { name: "Remote OK", url: "https://remoteok.com/" },
+    ],
+  },
+  {
+    id: "aggregators",
+    title: "The big aggregators",
+    boards: [
+      { name: "LinkedIn Jobs", url: "https://www.linkedin.com/jobs/" },
+      { name: "Indeed", url: "https://www.indeed.com/" },
+      {
+        name: "Google Jobs",
+        url: "https://www.google.com/search?q=software+engineer+jobs&ibp=htl;jobs",
+      },
     ],
   },
 ];

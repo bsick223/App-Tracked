@@ -43,7 +43,7 @@ export default function ResourceDetailPage() {
       },
       {
         id: "3",
-        title: "Where to find jobs?",
+        title: "Job Board",
         imagePath: "/photos/JobBoard.png",
       },
       {
