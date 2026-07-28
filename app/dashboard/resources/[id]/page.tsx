@@ -4,14 +4,17 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { RefreshCw, ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import JobBoardsSection from "./JobBoardsSection";
 
 // Define a type for the resources
 interface Resource {
   id: string;
   title: string;
   imagePath: string;
-  content: string;
-  videoUrl: string;
+  /** Omitted for resources that render a custom section instead of intro copy. */
+  content?: string;
+  /** Omitted for resources that render a custom section instead of a video. */
+  videoUrl?: string;
 }
 
 export default function ResourceDetailPage() {
@@ -40,11 +43,8 @@ export default function ResourceDetailPage() {
       },
       {
         id: "3",
-        title: "Where to find jobs?",
+        title: "Job Board",
         imagePath: "/photos/JobBoard.png",
-        content:
-          "Browse our extensive library of templates to find the perfect starting point for your project.",
-        videoUrl: "https://www.youtube.com/embed/mUpPj6gvYCw", // Replace with actual YouTube video ID
       },
       {
         id: "4",
@@ -166,54 +166,63 @@ export default function ResourceDetailPage() {
       {/* Resource content */}
       <div className="bg-[#121a36]/50 backdrop-blur-sm shadow rounded-lg overflow-hidden border border-[#20253d]/50">
         <div className="p-6">
-          <p className="text-gray-300 mb-6">{resource.content}</p>
+          {resource.content && (
+            <p className="text-gray-300 mb-6">{resource.content}</p>
+          )}
 
           {/* YouTube Video Embed */}
-          <div className="mb-8">
-            <div className="relative w-full pb-[56.25%] h-0 overflow-hidden rounded-md border border-[#20253d]/50 bg-black/20">
-              <iframe
-                src={resource.videoUrl}
-                title={`${resource.title} Video`}
-                className="absolute top-0 left-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
+          {resource.videoUrl && (
+            <div className="mb-8">
+              <div className="relative w-full pb-[56.25%] h-0 overflow-hidden rounded-md border border-[#20253d]/50 bg-black/20">
+                <iframe
+                  src={resource.videoUrl}
+                  title={`${resource.title} Video`}
+                  className="absolute top-0 left-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Additional content */}
-          <div className="space-y-6">
-            <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
-              <h3 className="text-lg font-light text-white mb-2">Overview</h3>
-              <p className="text-gray-400">
-                This is placeholder content for the {resource.title} resource.
-                You can replace this with actual content specific to each
-                resource.
-              </p>
-            </div>
+          {/* The job boards resource renders a real curated list instead of the
+              placeholder blocks used by the other resources. */}
+          {resource.id === "3" ? (
+            <JobBoardsSection />
+          ) : (
+            <div className="space-y-6">
+              <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
+                <h3 className="text-lg font-light text-white mb-2">Overview</h3>
+                <p className="text-gray-400">
+                  This is placeholder content for the {resource.title} resource.
+                  You can replace this with actual content specific to each
+                  resource.
+                </p>
+              </div>
 
-            <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
-              <h3 className="text-lg font-light text-white mb-2">
-                Key Features
-              </h3>
-              <ul className="text-gray-400 list-disc pl-5 space-y-2">
-                <li>Feature one description</li>
-                <li>Feature two description</li>
-                <li>Feature three description</li>
-                <li>Feature four description</li>
-              </ul>
-            </div>
+              <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
+                <h3 className="text-lg font-light text-white mb-2">
+                  Key Features
+                </h3>
+                <ul className="text-gray-400 list-disc pl-5 space-y-2">
+                  <li>Feature one description</li>
+                  <li>Feature two description</li>
+                  <li>Feature three description</li>
+                  <li>Feature four description</li>
+                </ul>
+              </div>
 
-            <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
-              <h3 className="text-lg font-light text-white mb-2">
-                Getting Help
-              </h3>
-              <p className="text-gray-400">
-                Need additional help? Contact our support team for personalized
-                assistance.
-              </p>
+              <div className="bg-[#0c1029]/70 p-4 rounded-md border border-[#20253d]/50">
+                <h3 className="text-lg font-light text-white mb-2">
+                  Getting Help
+                </h3>
+                <p className="text-gray-400">
+                  Need additional help? Contact our support team for
+                  personalized assistance.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

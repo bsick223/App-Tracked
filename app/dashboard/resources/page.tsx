@@ -10,6 +10,8 @@ interface Resource {
   id: string;
   title: string;
   imagePath: string;
+  /** Kept in the list but not shown on the grid. Flip to false (or delete) to bring one back. */
+  hidden?: boolean;
 }
 
 export default function ResourcesPage() {
@@ -52,28 +54,43 @@ export default function ResourcesPage() {
       imagePath: "/photos/LeetCode_Logo_1.png",
     },
     {
+      id: "3",
+      title: "Job Board",
+      imagePath: "/photos/JobBoard.png",
+    },
+    {
       id: "1",
       title: "Roadmap to your first offer",
       imagePath: "/photos/Offer.png",
+      hidden: true,
     },
-    { id: "2", title: "Mindset", imagePath: "/photos/Mindset.png" },
     {
-      id: "3",
-      title: "Where to find jobs?",
-      imagePath: "/photos/JobBoard.png",
+      id: "2",
+      title: "Mindset",
+      imagePath: "/photos/Mindset.png",
+      hidden: true,
     },
     {
       id: "4",
       title: "What should my Resume look like?",
       imagePath: "/photos/Resume.png",
+      hidden: true,
     },
     {
       id: "5",
       title: "How to get referrals?",
       imagePath: "/photos/Networking.png",
+      hidden: true,
     },
-    { id: "6", title: "How to apply?", imagePath: "/photos/HowtoApply.png" },
+    {
+      id: "6",
+      title: "How to apply?",
+      imagePath: "/photos/HowtoApply.png",
+      hidden: true,
+    },
   ];
+
+  const visibleResources = resources.filter((resource) => !resource.hidden);
 
   // Loading state
   if (isLoading) {
@@ -103,7 +120,7 @@ export default function ResourcesPage() {
 
       {/* Resources grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {resources.map((resource) => (
+        {visibleResources.map((resource) => (
           <Link
             key={resource.id}
             href={`/dashboard/resources/${resource.id}`}
