@@ -338,14 +338,12 @@ export function ProblemDetailModal({
               </div>
             </div>
             <div className="flex justify-end space-x-2 pt-2">
-              {!selectedProblem.mastered && (
-                <button
-                  onClick={onToggleEdit}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
-                >
-                  Edit Problem
-                </button>
-              )}
+              <button
+                onClick={onToggleEdit}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500"
+              >
+                Edit Problem
+              </button>
             </div>
           </div>
         )}
