@@ -24,10 +24,10 @@ function BoardCard({ board }: { board: JobBoard }) {
       href={board.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="group relative flex items-start gap-4 rounded-md border border-[#20253d]/50 bg-[#0c1029]/70 p-4 transition-all duration-300 hover:border-[#2c3352] hover:bg-[#0c1029]"
+      className="group flex items-center gap-3 rounded-md border border-[#20253d]/50 bg-[#0c1029]/70 px-3 py-2.5 transition-all duration-300 hover:border-[#2c3352] hover:bg-[#0c1029]"
     >
       <div
-        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md border bg-gradient-to-br text-lg font-medium ${accentFor(
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-gradient-to-br text-sm font-medium ${accentFor(
           board.name
         )}`}
         aria-hidden="true"
@@ -35,35 +35,25 @@ function BoardCard({ board }: { board: JobBoard }) {
         {board.name.charAt(0).toUpperCase()}
       </div>
 
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h4 className="truncate text-sm font-light text-white transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:via-purple-500 group-hover:to-blue-500 group-hover:bg-clip-text group-hover:text-transparent">
-            {board.name}
-          </h4>
-          {board.badge && (
-            <span className="shrink-0 rounded-full border border-[#20253d] px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-400">
-              {board.badge}
-            </span>
-          )}
-          <ExternalLink className="ml-auto h-3.5 w-3.5 shrink-0 text-gray-600 transition-colors group-hover:text-gray-300" />
-        </div>
-        <p className="mt-1 text-xs leading-relaxed text-gray-400">
-          {board.description}
-        </p>
-      </div>
+      <h4 className="min-w-0 flex-1 truncate text-sm font-light text-white transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:via-purple-500 group-hover:to-blue-500 group-hover:bg-clip-text group-hover:text-transparent">
+        {board.name}
+      </h4>
+
+      <ExternalLink className="h-3.5 w-3.5 shrink-0 text-gray-600 transition-colors group-hover:text-gray-300" />
     </a>
   );
 }
 
 export default function JobBoardsSection() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {jobBoardCategories.map((category) => (
         <section key={category.id}>
-          <h3 className="text-lg font-light text-white">{category.title}</h3>
-          <p className="mt-1 text-sm text-gray-400">{category.blurb}</p>
+          <h3 className="text-sm font-light uppercase tracking-wide text-gray-400">
+            {category.title}
+          </h3>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {category.boards.map((board) => (
               <BoardCard key={board.url} board={board} />
             ))}

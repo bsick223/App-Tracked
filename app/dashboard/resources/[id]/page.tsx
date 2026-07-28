@@ -11,7 +11,8 @@ interface Resource {
   id: string;
   title: string;
   imagePath: string;
-  content: string;
+  /** Omitted for resources that render a custom section instead of intro copy. */
+  content?: string;
   /** Omitted for resources that render a custom section instead of a video. */
   videoUrl?: string;
 }
@@ -44,8 +45,6 @@ export default function ResourceDetailPage() {
         id: "3",
         title: "Where to find jobs?",
         imagePath: "/photos/JobBoard.png",
-        content:
-          "Most people apply through the same one or two sites as everyone else, then wonder why nothing comes back. These are the boards worth your time, grouped by what each one is actually good for.",
       },
       {
         id: "4",
@@ -167,7 +166,9 @@ export default function ResourceDetailPage() {
       {/* Resource content */}
       <div className="bg-[#121a36]/50 backdrop-blur-sm shadow rounded-lg overflow-hidden border border-[#20253d]/50">
         <div className="p-6">
-          <p className="text-gray-300 mb-6">{resource.content}</p>
+          {resource.content && (
+            <p className="text-gray-300 mb-6">{resource.content}</p>
+          )}
 
           {/* YouTube Video Embed */}
           {resource.videoUrl && (
