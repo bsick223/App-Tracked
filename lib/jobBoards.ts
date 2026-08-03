@@ -27,6 +27,7 @@ export const jobBoardCategories: JobBoardCategory[] = [
       { name: "Jobright.ai", url: "https://jobright.ai/" },
       { name: "Simplify", url: "https://simplify.jobs/" },
       { name: "Handshake", url: "https://joinhandshake.com/" },
+      { name: "Summer 2027 Tech Internships by Vansh & Ouckah", url: "https://github.com/vanshb03/Summer2027-Internships"},
       {
         name: "SpeedyApply — 2027 SWE College Jobs",
         url: "https://github.com/speedyapply/2027-SWE-College-Jobs",
