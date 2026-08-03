@@ -24,6 +24,7 @@ export const jobBoardCategories: JobBoardCategory[] = [
     id: "new-grad",
     title: "New grad & internships",
     boards: [
+      { name: "ZeroToSudo", url: "https://www.instagram.com/stories/zero2sudo/" },
       { name: "Jobright.ai", url: "https://jobright.ai/" },
       { name: "Simplify", url: "https://simplify.jobs/" },
       { name: "Handshake", url: "https://joinhandshake.com/" },
