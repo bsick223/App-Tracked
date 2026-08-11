@@ -768,7 +768,9 @@ export default function LeetcodeTrackerPage() {
       const { _id } = editedProblem;
 
       // Get the original problem to calculate the day shift
-      const originalProblem = problems.find((p) => p._id === _id);
+      const originalProblem = [...problems, ...masteredProblems].find(
+        (p) => p._id === _id
+      );
       if (!originalProblem) {
         showToast("error", "Problem not found");
         return;
@@ -784,6 +786,11 @@ export default function LeetcodeTrackerPage() {
         editedProblem.spaceComplexity === "Other"
           ? editedProblem.customSpaceComplexity
           : editedProblem.spaceComplexity;
+
+      const score =
+        typeof editedProblem.score === "string"
+          ? parseInt(editedProblem.score, 10)
+          : editedProblem.score;
 
       // Prepare the update object with only the fields we want to update
       const updateData: {
@@ -804,19 +811,19 @@ export default function LeetcodeTrackerPage() {
         link: editedProblem.link,
         difficulty: editedProblem.difficulty,
         notes: editedProblem.notes,
-        score:
-          typeof editedProblem.score === "string"
-            ? parseInt(editedProblem.score, 10)
-            : editedProblem.score,
+        score,
         spaceComplexity: finalSpaceComplexity,
         timeComplexity: finalTimeComplexity,
         category: editedProblem.category,
       };
 
-      // Calculate the day shift based on score change
-      if (originalProblem.score !== updateData.score) {
+      const today = new Date().getDay();
+      const shouldReschedule =
+        originalProblem.score !== score || originalProblem.dayOfWeek === today;
+
+      if (shouldReschedule) {
         // Use the same function that's used for creating new problems
-        const targetDayOfWeek = getTargetDayOfWeek(updateData.score!);
+        const targetDayOfWeek = getTargetDayOfWeek(score);
 
         // Find the target status for the new day
         const targetStatus = statuses.find((s) => s.order === targetDayOfWeek);
